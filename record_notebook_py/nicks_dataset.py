@@ -4,8 +4,12 @@
 # <markdowncell>
 
 # # Table of Contents
-# * [pairing images and annotations](#pairing-images-and-annotations)
-# * [sampling images](#sampling-images)
+# * [Alternate tables](#Alternate-tables)
+# 	* [pairing images and annotations](#pairing-images-and-annotations)
+# 	* [sampling images](#sampling-images)
+# * [Regents tables](#Regents-tables)
+# * [Hough lines experiment](#Hough-lines-experiment)
+# * [End](#End)
 
 
 # <codecell>
@@ -116,13 +120,13 @@ regents_anno = os.listdir(regents_anno_path_prefix)
 
 # <codecell>
 
-regents_anno_8th = [an for an in regents_anno if '_8_' in an]
-regents_anno_4th = [an for an in regents_anno if '_4_' in an]
-regents_anno_other = [an for an in regents_anno if an not in regents_anno_4th + regents_anno_8th]
+regents_anno_8th = {an: ".PNG" for an in regents_anno if '_8_' in an}
+regents_anno_4th = {an: ".PNG" for an in regents_anno if '_4_' in an}
+regents_anno_other = {an: ".PNG" for an in regents_anno if an not in regents_anno_4th and an not in regents_anno_8th}
 
 # <codecell>
 
-assert(set(regents_anno_other + regents_anno_8th + regents_anno_4th) == set(regents_anno))
+# assert(set(regents_anno_other + regents_anno_8th + regents_anno_4th) == set(regents_anno))
 
 # <codecell>
 
@@ -131,7 +135,68 @@ regents_images_8 = os.listdir(regents_image_path_prefix + '/8th')
 
 # <codecell>
 
-Image.open(regents_image_path_prefix + '/4th/' + regents_images_4[0])
+
+
+# <codecell>
+
+regents_anno_8th
+
+# <codecell>
+
+img_n = 0
+
+# <codecell>
+
+anno_n = 0
+
+# <codecell>
+
+anno_n += 1
+with open(regents_anno_path_prefix + list(regents_anno_4th.keys())[anno_n]) as f:
+    print(f.read())
+
+# <codecell>
+
+img_n += 1
+print(regents_images_4[img_n])
+Image.open(regents_image_path_prefix + '/4th/' + regents_images_4[img_n])
+
+# <codecell>
+
+name_mapping = {
+    '2007_4_15.jpg.txt': '2007_4th_Grade_09.PNG',
+    '2009_4_31b.jpg.txt': '2009_4th_Grade_11.PNG',
+    '2009_4_40.jpg.txt': '2009_4th_Grade_18.PNG',
+    '2011_4_32.jpg.txt': '2011_4th_Grade_16.PNG',
+    '2004_8_55_2.jpg.txt': '.PNG',
+ '2004_8_64-65.jpg.txt': '.PNG',
+ '2005_8_38.jpg.txt': '.PNG',
+ '2005_8_46-48.jpg.txt': '.PNG',
+ '2005_8_79.jpg.txt': '.PNG',
+ '2007_8_49-50.jpg.txt': '.PNG',
+ '2007_8_60.jpg.txt': '.PNG',
+ '2009_8_33.jpg.txt': '.PNG',
+ '2009_8_79-81.jpg.txt': '.PNG',
+ '2009_8_82-83b.jpg.txt': '.PNG',
+ '2011_8_56.jpg.txt': '.PNG',
+ '2011_8_79-80.jpg.txt': '.PNG'
+}
+
+# <codecell>
+
+
+
+# <codecell>
+
+
+
+# <codecell>
+
+
+
+# <codecell>
+
+
 
 # <codecell>
 
