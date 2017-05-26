@@ -122,7 +122,7 @@ regents_anno = os.listdir(regents_anno_path_prefix)
 
 regents_anno_8th = {an: ".PNG" for an in regents_anno if '_8_' in an}
 regents_anno_4th = {an: ".PNG" for an in regents_anno if '_4_' in an}
-regents_anno_other = {an: ".PNG" for an in regents_anno if an not in regents_anno_4th and an not in regents_anno_8th}
+regents_anno_other = {an: an.replace('.jpg.txt', '.png') for an in regents_anno if an not in regents_anno_4th and an not in regents_anno_8th}
 
 # <codecell>
 
@@ -132,11 +132,7 @@ regents_anno_other = {an: ".PNG" for an in regents_anno if an not in regents_ann
 
 regents_images_4 = os.listdir(regents_image_path_prefix + '/4th')
 regents_images_8 = os.listdir(regents_image_path_prefix + '/8th')
-regents_images_8 = [ri for ri in regents_images_8 if '2011' in ri]
-
-# <codecell>
-
-regents_images_8
+# regents_images_8 = [ri for ri in regents_anno_other if '2011' in ri]
 
 # <codecell>
 
@@ -148,17 +144,23 @@ anno_n = 0
 
 # <codecell>
 
-anno_n += 1
-with open(regents_anno_path_prefix + list(regents_anno_8th.keys())[anno_n]) as f:
-    print(list(regents_anno_8th.keys())[anno_n])
-    print()
-    print(f.read())
+# img_n +=1
+# print(regents_images_8[img_n])
+# Image.open(regents_image_path_prefix + '/8th/' + regents_images_8[img_n])
 
 # <codecell>
 
-img_n +=1
-print(regents_images_8[img_n])
-Image.open(regents_image_path_prefix + '/8th/' + regents_images_8[img_n])
+# anno_n += 1
+# with open(regents_anno_path_prefix + list(regents_anno_other.keys())[anno_n]) as f:
+#     print(list(regents_anno_other.keys())[anno_n])
+#     print()
+#     print(f.read())
+
+# anno_n += 1
+# with open(regents_anno_path_prefix + list(regents_anno_other.keys())[anno_n]) as f:
+#     print(list(regents_anno_other.keys())[anno_n])
+#     print()
+#     print(f.read())
 
 # <codecell>
 
@@ -180,12 +182,26 @@ name_mapping = {
     '2009_8_79-81.jpg.txt': '2009_8th_Grade_41.PNG',
     '2009_8_82-83b.jpg.txt': '2009_8th_Grade_43.PNG',
     '2011_8_56.jpg.txt': '2011_8th_Grade_33.PNG',
-    '2011_8_79-80.jpg.txt': '.PNG'
-}
-
-# <codecell>
-
-
+    '2011_8_79-80.jpg.txt': '2011_8th_Grade_46.PNG',
+    
+    '2007-01-24_12_54-56.jpg.txt': '2007-01-24_12_54-56.png',
+    '2007-01-24_12_77-79.jpg.txt': '2007-01-24_12_77-79.png',
+    '2007-08-16_12_16_3.jpg.txt': '2007-08-16_12_16_3.png', 
+    '2007-08-16_12_20.jpg.txt': '2007-08-16_12_20.png',
+    '2007-08-16_12_75-77.jpg.txt': '2007-08-16_12_75-77.png',
+    '2009-01-28_12_13_1.jpg.txt': '2009-01-28_12_13_1.png',
+    '2009-01-28_12_13_4.jpg.txt': '2009-01-28_12_13_4.png',
+    '2009-01-28_12_71-74.jpg.txt': '2009-01-28_12_71-74.png',
+    '2009-06-17_12_13.jpg.txt': '2009-06-17_12_13.png',
+    '2009-06-17_12_33_2.jpg.txt': '2009-06-17_12_33_2.png',
+    '2009-06-17_12_34.jpg.txt': '2009-06-17_12_34.png',
+    '2009-06-17_12_54-57.jpg.txt': '2009-06-17_12_54-57.png',
+    '2009-08-13_12_35_1.jpg.txt': '2009-08-13_12_35_1.png',
+    '2009-08-13_12_35_4.jpg.txt': '2009-08-13_12_35_4.png',
+    '2009-08-13_12_45-47.jpg.txt': '2009-08-13_12_45-47.png',
+    '2011-06-17_12_36-40.jpg.txt': '2011-06-17_12_36-40.png',
+    '2011-06-17_12_47-50.jpg.txt': '2011-06-17_12_47-50.png'
+    }
 
 # <codecell>
 
