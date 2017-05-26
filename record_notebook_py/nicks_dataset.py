@@ -132,14 +132,11 @@ regents_anno_other = {an: ".PNG" for an in regents_anno if an not in regents_ann
 
 regents_images_4 = os.listdir(regents_image_path_prefix + '/4th')
 regents_images_8 = os.listdir(regents_image_path_prefix + '/8th')
+regents_images_8 = [ri for ri in regents_images_8 if '2011' in ri]
 
 # <codecell>
 
-
-
-# <codecell>
-
-regents_anno_8th
+regents_images_8
 
 # <codecell>
 
@@ -152,14 +149,16 @@ anno_n = 0
 # <codecell>
 
 anno_n += 1
-with open(regents_anno_path_prefix + list(regents_anno_4th.keys())[anno_n]) as f:
+with open(regents_anno_path_prefix + list(regents_anno_8th.keys())[anno_n]) as f:
+    print(list(regents_anno_8th.keys())[anno_n])
+    print()
     print(f.read())
 
 # <codecell>
 
-img_n += 1
-print(regents_images_4[img_n])
-Image.open(regents_image_path_prefix + '/4th/' + regents_images_4[img_n])
+img_n +=1
+print(regents_images_8[img_n])
+Image.open(regents_image_path_prefix + '/8th/' + regents_images_8[img_n])
 
 # <codecell>
 
@@ -168,18 +167,20 @@ name_mapping = {
     '2009_4_31b.jpg.txt': '2009_4th_Grade_11.PNG',
     '2009_4_40.jpg.txt': '2009_4th_Grade_18.PNG',
     '2011_4_32.jpg.txt': '2011_4th_Grade_16.PNG',
-    '2004_8_55_2.jpg.txt': '.PNG',
- '2004_8_64-65.jpg.txt': '.PNG',
- '2005_8_38.jpg.txt': '.PNG',
- '2005_8_46-48.jpg.txt': '.PNG',
- '2005_8_79.jpg.txt': '.PNG',
- '2007_8_49-50.jpg.txt': '.PNG',
- '2007_8_60.jpg.txt': '.PNG',
- '2009_8_33.jpg.txt': '.PNG',
- '2009_8_79-81.jpg.txt': '.PNG',
- '2009_8_82-83b.jpg.txt': '.PNG',
- '2011_8_56.jpg.txt': '.PNG',
- '2011_8_79-80.jpg.txt': '.PNG'
+    
+    
+    '2004_8_55_2.jpg.txt': '2004_8th_Grade_53.PNG',
+    '2004_8_64-65.jpg.txt': '2004_8th_Grade_55.PNG',
+    '2005_8_38.jpg.txt': '2005_8th_Grade_26.PNG',
+    '2005_8_46-48.jpg.txt': '2005_8th_Grade_29.PNG',
+    '2005_8_79.jpg.txt': '2005_8th_Grade_44.PNG',
+    '2007_8_49-50.jpg.txt': '2007_8th_Grade_20.PNG',
+    '2007_8_60.jpg.txt': '2007_8th_Grade_27 .PNG',
+    '2009_8_33.jpg.txt': '2009_8th_Grade_16.PNG',
+    '2009_8_79-81.jpg.txt': '2009_8th_Grade_41.PNG',
+    '2009_8_82-83b.jpg.txt': '2009_8th_Grade_43.PNG',
+    '2011_8_56.jpg.txt': '2011_8th_Grade_33.PNG',
+    '2011_8_79-80.jpg.txt': '.PNG'
 }
 
 # <codecell>
