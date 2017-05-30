@@ -26,6 +26,7 @@ from collections import Counter, defaultdict
 %autoreload 2
 
 import os
+import shutil
 import cv2
 import PIL.Image as Image
 
@@ -47,12 +48,12 @@ anno_files = os.listdir(anno_path_prefix)
 
 # <codecell>
 
-image_bases = [''.join(f.split('.')[:-1]) for f in image_files]
-anno_bases = [''.join(f.split('.')[:-2]) for f in anno_files]
+image_bases = ['.'.join(f.split('.')[:-1]) for f in image_files]
+anno_bases = ['.'.join(f.split('.')[:-2]) for f in anno_files]
 
 # <codecell>
 
-images_with_anno  = [f  for f in image_files if ''.join(f.split('.')[:-1]) in anno_bases]
+images_with_anno  = [f  for f in image_files if '.'.join(f.split('.')[:-1]) in anno_bases]
 
 # <codecell>
 
@@ -60,19 +61,15 @@ bases_intersection = set(image_bases).intersection(set(anno_bases))
 
 # <codecell>
 
-len(bases_intersection)
-
-# <codecell>
-
-len(anno_bases)
-
-# <codecell>
-
-len(anno_bases)
+print(len(bases_intersection), len(anno_bases), len(images_with_anno))
 
 # <markdowncell>
 
 # images missing annotations
+
+# <codecell>
+
+len(image_bases)
 
 # <codecell>
 
@@ -100,10 +97,6 @@ with open(anno_path_prefix + anno_files[sample_n]) as f:
     sample_anno = f.readlines()
 
 split_lines = [l.split(',', maxsplit=4) for l in sample_anno]
-
-# <codecell>
-
-split_lines[0]
 
 # <markdowncell>
 
@@ -136,34 +129,6 @@ regents_images_8 = os.listdir(regents_image_path_prefix + '/8th')
 
 # <codecell>
 
-img_n = 0
-
-# <codecell>
-
-anno_n = 0
-
-# <codecell>
-
-# img_n +=1
-# print(regents_images_8[img_n])
-# Image.open(regents_image_path_prefix + '/8th/' + regents_images_8[img_n])
-
-# <codecell>
-
-# anno_n += 1
-# with open(regents_anno_path_prefix + list(regents_anno_other.keys())[anno_n]) as f:
-#     print(list(regents_anno_other.keys())[anno_n])
-#     print()
-#     print(f.read())
-
-# anno_n += 1
-# with open(regents_anno_path_prefix + list(regents_anno_other.keys())[anno_n]) as f:
-#     print(list(regents_anno_other.keys())[anno_n])
-#     print()
-#     print(f.read())
-
-# <codecell>
-
 name_mapping = {
     '2007_4_15.jpg.txt': '2007_4th_Grade_09.PNG',
     '2009_4_31b.jpg.txt': '2009_4th_Grade_11.PNG',
@@ -177,7 +142,7 @@ name_mapping = {
     '2005_8_46-48.jpg.txt': '2005_8th_Grade_29.PNG',
     '2005_8_79.jpg.txt': '2005_8th_Grade_44.PNG',
     '2007_8_49-50.jpg.txt': '2007_8th_Grade_20.PNG',
-    '2007_8_60.jpg.txt': '2007_8th_Grade_27 .PNG',
+    '2007_8_60.jpg.txt': '2007_8th_Grade_27.PNG',
     '2009_8_33.jpg.txt': '2009_8th_Grade_16.PNG',
     '2009_8_79-81.jpg.txt': '2009_8th_Grade_41.PNG',
     '2009_8_82-83b.jpg.txt': '2009_8th_Grade_43.PNG',
@@ -201,15 +166,152 @@ name_mapping = {
     '2009-08-13_12_45-47.jpg.txt': '2009-08-13_12_45-47.png',
     '2011-06-17_12_36-40.jpg.txt': '2011-06-17_12_36-40.png',
     '2011-06-17_12_47-50.jpg.txt': '2011-06-17_12_47-50.png'
+}
+
+# <codecell>
+
+# with open('image_anno_mapping.json', 'w') as f:
+#     json.dump(name_mapping, f)
+
+# <markdowncell>
+
+# # Build new dataset
+
+# <codecell>
+
+import ai2.vision.utils as ai2vu
+
+# <codecell>
+
+new_data_dir = '/Users/schwenk/wrk/tableparse/data/test_data/'
+regents_path_prefix = '/Users/schwenk/wrk/tableparse/data/exp_nicks_data/regents_images/all_images/'
+
+# <codecell>
+
+def read_image_anno(img_f, anno_f=None):
+    if not anno_f:
+        ann_ext = '.jpg.txt'
+        anno_f = anno_path_prefix + os.path.splitext(fb)[0]  + ann_ext
+    with open(anno_f) as f:
+        sample_anno = f.readlines()
+    split_lines = [l.split(',', maxsplit=4) for l in sample_anno]
+    build_image_anno = [{'text': line[-1].strip() , 'rectangle': list(map(int, line[:4]))} for line in split_lines]
+    image_number = str(img_counter).zfill(3)
+    new_img_name = 'table_' + image_number + '.png'
+    image_anno = {
+        'annotations': build_image_anno,
+        'imageName': new_img_name,
+        'tableID': 'T_' + image_number,
+        'legacyName': os.path.split(fb)[1],
     }
+    return {image_anno['tableID']: image_anno}, new_img_name
+
+# <codecell>
+
+img_counter = 0
+image_annotations = {}
+
+# <markdowncell>
+
+# building image annotations and standardizing images
+
+# <codecell>
+
+for fb in images_with_anno:
+    img_counter += 1
+    img_f = image_path_prefix + fb
+    img_anno, new_img_name = read_image_anno(img_f)
+    image_annotations.update(img_anno)
+    new_img = new_data_dir + 'images/' + new_img_name
+    standardized_img, _ = ai2vu.standardize_images.standardize_image(img_f)
+    cv2.imwrite(new_img, standardized_img)
+
+for anno_file, img_file in name_mapping.items():
+    img_counter += 1
+    img_f = regents_path_prefix + img_file
+    img_anno, new_img_name = read_image_anno(img_f)
+    image_annotations.update(img_anno)
+    new_img = new_data_dir + 'images/' + new_img_name
+    standardized_img, _ = ai2vu.standardize_images.standardize_image(img_f)
+    cv2.imwrite(new_img, standardized_img)
+
+# <codecell>
+
+def random_color():
+    import random
+    return random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)
+
+def draw_detections(gt_anno):    
+    image = cv2.imread(new_data_dir + 'images/' + gt_anno['imageName'])
+    color_counter = 0
+    for cell in gt_anno['annotations']:
+        cell = cell['rectangle']
+        start_x = cell[0] 
+        start_y = cell[1]
+        end_x = cell[0] + cell[2]
+        end_y = cell[1] + cell[3]
+        cv2.rectangle(image, (start_x, start_y), (end_x, end_y), color=random_color(), thickness=2)
+        color_counter += 1
+    return Image.fromarray(image)
+
+# <codecell>
+
+with open(new_data_dir + 'table_ground_truth.json', 'w') as f:
+    json.dump(image_annotations, f, sort_keys=True, indent=4)
+
+# <codecell>
+
+test_anno = image_annotations['T_130']
+# draw_detections(test_anno)
 
 # <codecell>
 
 
 
+# <markdowncell>
+
+# ## looking at resized images
+
 # <codecell>
 
+def get_max_dim(img_anno):
+    boxes = [(box['rectangle'][0] + box['rectangle'][2], box['rectangle'][1] + box['rectangle'][3]) for box in list(img_anno.values())[0]['annotations']]
+    xs, ys = list(zip(*boxes))
+    max_x = max(xs)
+    max_y = max(ys)
+    return max_x, max_y
 
+# <codecell>
+
+img_counter = 0
+
+# <codecell>
+
+for fb in images_with_anno:
+    img_counter += 1
+    img_f = image_path_prefix + fb
+    img_anno, new_img_name = read_image_anno(img_f)
+    max_x, max_y = get_max_dim(img_anno)
+    image_shape = Image.open(img_f).size
+    new_img = new_data_dir + 'images/' + new_img_name
+    standardized_img, _ = ai2vu.standardize_images.standardize_image(img_f)
+    resized_shape = standardized_img.shape[:2][::-1]
+    if image_shape != resized_shape:
+        print(img_counter, image_shape, resized_shape)
+
+# <codecell>
+
+for anno_file, img_file in name_mapping.items():
+    img_counter += 1
+    img_f = regents_path_prefix + img_file
+    img_anno, new_img_name = read_image_anno(img_f)
+    max_x, max_y = get_max_dim(img_anno)
+    image_shape = Image.open(img_f).size
+    new_img = new_data_dir + 'images/' + new_img_name
+    standardized_img, _ = ai2vu.standardize_images.standardize_image(img_f)
+    resized_shape = standardized_img.shape[:2][::-1]
+    if image_shape != resized_shape:
+        print(img_counter, image_shape, resized_shape)
 
 # <codecell>
 
@@ -505,6 +607,28 @@ draw_detections(image_path_prefix + sample_image, random.sample(new_boxes, 10))
 # <markdowncell>
 
 # # End
+
+# <codecell>
+
+# img_n = 0
+
+# anno_n = 0
+
+# # img_n +=1
+# # print(regents_images_8[img_n])
+# # Image.open(regents_image_path_prefix + '/8th/' + regents_images_8[img_n])
+
+# # anno_n += 1
+# # with open(regents_anno_path_prefix + list(regents_anno_other.keys())[anno_n]) as f:
+# #     print(list(regents_anno_other.keys())[anno_n])
+# #     print()
+# #     print(f.read())
+
+# # anno_n += 1
+# # with open(regents_anno_path_prefix + list(regents_anno_other.keys())[anno_n]) as f:
+# #     print(list(regents_anno_other.keys())[anno_n])
+# #     print()
+# #     print(f.read())
 
 # <codecell>
 
