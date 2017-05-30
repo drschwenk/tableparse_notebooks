@@ -261,8 +261,8 @@ with open(new_data_dir + 'table_ground_truth.json', 'w') as f:
 
 # <codecell>
 
-test_anno = image_annotations['T_130']
-# draw_detections(test_anno)
+test_anno = image_annotations['T_050']
+draw_detections(test_anno)
 
 # <codecell>
 
