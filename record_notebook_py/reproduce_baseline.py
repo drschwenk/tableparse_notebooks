@@ -59,6 +59,7 @@
 from __future__ import division
 import numpy as np
 import pandas as pd
+import sklearn as sk
 import scipy.stats as st
 import itertools
 import math
@@ -81,13 +82,18 @@ plt.rcParams['figure.figsize'] = (16.0, 10.0)
 # <codecell>
 
 import os
+import requests
+import base64
+import PIL.Image as Image
+import cv2
 from urllib.request import url2pathname
+import ai2.vision.utils as ai2vu
 
 # <codecell>
 
 %load_ext version_information
 %reload_ext version_information
-%version_information numpy, matplotlib, pandas, scipy
+%version_information numpy, matplotlib, pandas, scipy, sklearn
 
 # <markdowncell>
 
@@ -151,6 +157,109 @@ with open(data_path_1) as f:
 # <markdowncell>
 
 # # Analysis
+
+# <markdowncell>
+
+# ## Nick's reported results
+
+# <markdowncell>
+
+# ![Screen%20Shot%202017-05-31%20at%2010.16.52%20AM.png](attachment:Screen%20Shot%202017-05-31%20at%2010.16.52%20AM.png)
+
+# <markdowncell>
+
+# ## Running Alternate through current pipeline
+
+# <codecell>
+
+# api_entry_point = 'http://vision-tableparse.dev.allenai.org/v1/tableparse'
+api_entry_point_local = 'http://127.0.0.1:5000/v1/tableparse'
+header = {'Content-Type': 'application/json'}
+
+def request_table_parse(image, rq_attr):
+    request_data = {
+        rq_attr: image.decode('utf-8'),
+        'border_table': 'True'
+    }
+    json_data = json.dumps(request_data)
+    response = requests.post(api_entry_point_local, data=json_data, headers=header)
+    json_response = json.loads(response.content.decode())
+    if json_response:
+        response = json_response
+    return response
+
+def parse_table_image(image_path):
+    b64_encoded_image = base64.b64encode(open(image_path, 'rb').read())
+    parser_response = request_table_parse(b64_encoded_image, 'image')
+    return parser_response
+
+# <codecell>
+
+image_base_path = '/Users/schwenk/wrk/tableparse/data/test_data/images'
+
+# <codecell>
+
+test_table = list(table_grountruth.values())[9]
+
+# <codecell>
+
+img_path = os.path.join(image_base_path, test_table['imageName'])
+
+# <codecell>
+
+Image.open(img_path)
+
+# <codecell>
+
+test_gt_box = test_table['annotations'][0]
+
+# <codecell>
+
+test_gt_box
+
+# <codecell>
+
+test_response = parse_table_image(img_path)
+
+# <codecell>
+
+test_response.keys()
+
+# <codecell>
+
+build_detected_boxes = [item for sublist in list(test_response.values()) for item in sublist]
+detected_boxes = [item for sublist in build_detected_boxes for item in sublist]
+
+# <codecell>
+
+detected_boxes[0]
+
+# <codecell>
+
+test_gt_box
+
+# <markdowncell>
+
+# ## cell-level agreement
+
+# <codecell>
+
+def boxes_overlap(detected_box, gt_box, thresh=0.5):
+    detected_coords = [[detected_box['rectangle'][n]['x'], detected_box['rectangle'][n]['y']] for n in range(2)]
+    detected_coords = [item for sublist in detected_coords for item in sublist]
+    gt_coords = gt_box['rectangle']
+    gt_coords = gt_coords[:2] + list(map(np.add, gt_coords[:2], gt_coords[2:]))
+
+    def area(box):
+        return (box[3] - box[1]) * (box[2] - box[0])
+
+    dx = min(detected_coords[2], gt_coords[2]) - max(detected_coords[0], gt_coords[0])
+    dy = min(detected_coords[3], gt_coords[3]) - max(detected_coords[1], gt_coords[1])
+    if (dx >= 0) and (dy >= 0):
+        intersection_area = dx * dy
+        return float(intersection_area) / min(area(detected_coords), area(gt_coords))
+    else:
+        return False
 
 # <codecell>
 
