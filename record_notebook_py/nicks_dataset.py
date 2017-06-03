@@ -329,8 +329,6 @@ for anno_file, img_file in name_mapping.items():
 
 easy_image = '/Users/schwenk/wrk/tableparse/vision-tableparse/examples/example_1.png'
 
-# <codecell>
-
 # img = cv2.imread(image_path_prefix + sample_image)
 img = cv2.imread(easy_image)
 
@@ -349,6 +347,18 @@ for x in range(0, len(lines)):
 # <codecell>
 
 Image.fromarray(edges)
+
+# <codecell>
+
+# You need to choose 4 or 8 for connectivity type
+connectivity = 4
+ret, thresh = cv2.threshold(gray,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+# Perform the operation
+output = cv2.connectedComponentsWithStats(thresh, connectivity, cv2.CV_32S)
+
+# <codecell>
+
+output[]
 
 # <codecell>
 

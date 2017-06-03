@@ -14698,23 +14698,12 @@ HhIAAAAASUVORK5CYII=
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[21]:</div>
+<div class="prompt input_prompt">In&nbsp;[15]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">easy_image</span> <span class="o">=</span> <span class="s1">&#39;/Users/schwenk/wrk/tableparse/vision-tableparse/examples/example_1.png&#39;</span>
-</pre></div>
 
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[22]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># img = cv2.imread(image_path_prefix + sample_image)</span>
+<span class="c1"># img = cv2.imread(image_path_prefix + sample_image)</span>
 <span class="n">img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">easy_image</span><span class="p">)</span>
 
 <span class="n">gray</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">img</span><span class="p">,</span><span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_BGR2GRAY</span><span class="p">)</span>
@@ -14737,7 +14726,7 @@ HhIAAAAASUVORK5CYII=
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[23]:</div>
+<div class="prompt input_prompt">In&nbsp;[4]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">Image</span><span class="o">.</span><span class="n">fromarray</span><span class="p">(</span><span class="n">edges</span><span class="p">)</span>
@@ -14753,7 +14742,7 @@ HhIAAAAASUVORK5CYII=
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[23]:</div>
+<div class="prompt output_prompt">Out[4]:</div>
 
 
 
@@ -14830,6 +14819,104 @@ mO+rCdE3OcWjh88NB+B0JGb7li2j7/UsAeql7mT7xei06N7rxnn0lLxLDZcVU2w4YyN4MUY3JpUx
 DJ9pvq3a/gAAAABJRU5ErkJggg==
 "
 >
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[8]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># You need to choose 4 or 8 for connectivity type</span>
+<span class="n">connectivity</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="n">ret</span><span class="p">,</span> <span class="n">thresh</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">threshold</span><span class="p">(</span><span class="n">gray</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="n">cv2</span><span class="o">.</span><span class="n">THRESH_BINARY</span><span class="o">+</span><span class="n">cv2</span><span class="o">.</span><span class="n">THRESH_OTSU</span><span class="p">)</span>
+<span class="c1"># Perform the operation</span>
+<span class="n">output</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">connectedComponentsWithStats</span><span class="p">(</span><span class="n">thresh</span><span class="p">,</span> <span class="n">connectivity</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">CV_32S</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[14]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">output</span><span class="p">[]</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[14]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>array([[   29,    18,   527,   186,  8784],
+       [    0,     0,   587,   218, 40288],
+       [   30,    20,   174,    40,  6554],
+       [  205,    20,   175,    40,  6512],
+       [  381,    20,   174,    40,  6489],
+       [   99,    32,     7,    11,    62],
+       [  132,    35,     5,     3,    10],
+       [  323,    35,     5,     3,    10],
+       [  488,    35,     5,     3,    11],
+       [  113,    39,     5,     4,    11],
+       [   30,    61,   174,    40,  6349],
+       [  205,    61,   175,    40,  6530],
+       [  381,    61,   174,    40,  6503],
+       [  136,    73,     6,     4,    20],
+       [  268,    73,     7,    11,    64],
+       [  280,    73,     7,    11,    64],
+       [  455,    73,     7,    11,    65],
+       [   57,    76,     6,     4,    22],
+       [   69,    76,     6,     8,    44],
+       [  474,    76,     6,     8,    44],
+       [  136,    79,     6,     5,    27],
+       [   99,    80,     6,     5,    19],
+       [  298,    80,     6,     5,    19],
+       [   30,   102,   174,    40,  6374],
+       [  205,   102,   175,    40,  6543],
+       [  381,   102,   174,    40,  6507],
+       [  280,   114,     7,    11,    65],
+       [  455,   114,     7,    12,    65],
+       [   57,   117,     6,     4,    22],
+       [   69,   117,     6,     8,    44],
+       [  474,   117,     6,     8,    43],
+       [  251,   119,     6,     6,    32],
+       [   99,   121,     6,     5,    19],
+       [  298,   121,     6,     5,    20],
+       [   30,   143,   174,    40,  6343],
+       [  205,   143,   175,    40,  6554],
+       [  381,   143,   174,    40,  6487],
+       [  280,   155,     7,    11,    65],
+       [  455,   154,     7,    12,    65],
+       [  443,   157,     5,     6,    18],
+       [   57,   158,     6,     4,    22],
+       [   69,   158,     6,     8,    44],
+       [  474,   158,     6,     8,    43],
+       [  251,   160,     6,     6,    33],
+       [   99,   162,     6,     5,    19],
+       [  298,   162,     6,     5,    20],
+       [  378,   197,     4,     2,     6],
+       [  472,   197,     4,     2,     6],
+       [  513,   197,     4,     2,     6]], dtype=int32)</pre>
 </div>
 
 </div>
