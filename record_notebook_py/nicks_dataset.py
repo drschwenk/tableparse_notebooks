@@ -179,10 +179,6 @@ name_mapping = {
 
 # <codecell>
 
-import ai2.vision.utils as ai2vu
-
-# <codecell>
-
 new_data_dir = '/Users/schwenk/wrk/tableparse/data/test_data/'
 regents_path_prefix = '/Users/schwenk/wrk/tableparse/data/exp_nicks_data/regents_images/all_images/'
 
@@ -208,6 +204,10 @@ def read_image_anno(img_f, anno_f=None):
 
 # <codecell>
 
+import ai2.vision.utils as ai2vu
+
+# <codecell>
+
 img_counter = 0
 image_annotations = {}
 
@@ -223,17 +223,23 @@ for fb in images_with_anno:
     img_anno, new_img_name = read_image_anno(img_f)
     image_annotations.update(img_anno)
     new_img = new_data_dir + 'images/' + new_img_name
-    standardized_img, _ = ai2vu.standardize_images.standardize_image(img_f)
-    cv2.imwrite(new_img, standardized_img)
+#     standardized_img, _ = ai2vu.standardize_images.standardize_image(img_f)
+#     cv2.imwrite(new_img, standardized_img)
 
 for anno_file, img_file in name_mapping.items():
     img_counter += 1
     img_f = regents_path_prefix + img_file
-    img_anno, new_img_name = read_image_anno(img_f)
+    anno_file = os.path.join(regents_anno_path_prefix, anno_file)
+    img_anno, new_img_name = read_image_anno(img_f, anno_file)
     image_annotations.update(img_anno)
     new_img = new_data_dir + 'images/' + new_img_name
+    print(img_f, new_img_name)
     standardized_img, _ = ai2vu.standardize_images.standardize_image(img_f)
     cv2.imwrite(new_img, standardized_img)
+
+# <markdowncell>
+
+# ### image_annotations['T_101']
 
 # <codecell>
 
@@ -256,13 +262,17 @@ def draw_detections(gt_anno):
 
 # <codecell>
 
-with open(new_data_dir + 'table_ground_truth.json', 'w') as f:
-    json.dump(image_annotations, f, sort_keys=True, indent=4)
+# with open(new_data_dir + 'table_ground_truth.json', 'w') as f:
+#     json.dump(image_annotations, f, sort_keys=True, indent=4)
 
 # <codecell>
 
-test_anno = image_annotations['T_050']
+test_anno = image_annotations['T_100']
 draw_detections(test_anno)
+
+# <codecell>
+
+test_anno
 
 # <codecell>
 

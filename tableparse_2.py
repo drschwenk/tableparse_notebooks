@@ -1,57 +1,3 @@
-# -*- coding: utf-8 -*-
-# <nbformat>4</nbformat>
-
-# <markdowncell>
-
-# # Table of Contents
-# * [Introduction](#Introduction)
-# 	* [Guiding questions](#Guiding-questions)
-# 	* [Related notebooks](#Related-notebooks)
-# * [Setup](#Setup)
-# 	* [Imports](#Imports)
-# 	* [Load data](#Load-data)
-# 	* [code](#code)
-# 	* [load](#load)
-# * [Analysis](#Analysis)
-# 	* [code](#code)
-# 	* [run](#run)
-# * [Conclusions](#Conclusions)
-# 	* [Key findings](#Key-findings)
-# 	* [Next steps](#Next-steps)
-
-
-# <markdowncell>
-
-# # Introduction
-
-# <markdowncell>
-
-# ## Guiding questions
-
-# <markdowncell>
-
-# * Guiding question:
-# Can I improve grid extraction by finding largest component first, then extracting contours
-
-# <markdowncell>
-
-# ## Related notebooks
-
-# <markdowncell>
-
-# * **Related notebooks:**  early_table_parse_experiment.ipynb
-
-# <markdowncell>
-
-# # Setup
-
-# <markdowncell>
-
-# ## Imports
-
-# <codecell>
-
-%%capture
 from __future__ import division
 import numpy as np
 import pandas as pd
@@ -60,45 +6,19 @@ import itertools
 import math
 import hashlib
 from collections import Counter, defaultdict
-%load_ext autoreload
-%autoreload 2
-
-# <codecell>
-
-%%capture
 import matplotlib as mpl
 import matplotlib.pylab as plt
-%matplotlib inline
-%load_ext base16_mplrc
-%base16_mplrc light solarized
-plt.rcParams['grid.linewidth'] = 0
-plt.rcParams['figure.figsize'] = (16.0, 10.0)
-
-# <codecell>
 
 import os
 import cv2
-
 import PIL.Image as Image
 import skimage.filters
-
 from urllib.request import url2pathname
+import base64
+from io import BytesIO
+import requests
 
-# <codecell>
 
-%load_ext version_information
-%reload_ext version_information
-%version_information numpy, matplotlib, pandas, scipy, cv2, skimage, PIL
-
-# <markdowncell>
-
-# # Analysis
-
-# <markdowncell>
-
-# ## code
-
-# <codecell>
 
 def ifa(img_arr):
     return Image.fromarray(img_arr)
@@ -126,8 +46,6 @@ def draw_detections(img_path, found_cells):
         color_counter += 1
     return Image.fromarray(image)
 
-
-# <codecell>
 
 def convert_binary_image(binary_image):
     image = binary_image.astype('uint8') * np.ones_like(binary_image) * 255
@@ -167,198 +85,18 @@ def compute_grid_contours(assumed_grid_mask):
     child_idxs = hierarchy[:,-1] == 0
     return [cont for idx, cont in enumerate(contours) if child_idxs[idx]]
 
-# <markdowncell>
+def parse_grid(image):
+    test_img = cv2.imread(image_to_do)
+    image_name = os.path.split(image_to_do)[-1]
 
-# ## run
+    foreground_img = foreground_image(test_img)
+    connected_components = connect_and_label_components(foreground_img)
+    candidate_grid = find_largest_component(connected_components)
+    grid_contours = compute_grid_contours(candidate_grid)
 
-# <codecell>
+    bounding_boxes = [cell_from_contour(cont) for cont in grid_contours]
+    grid_cells = [GridCell(cell_from_contour(cont)) for cont in grid_contours]
 
-import glob
-hard_image = '/Users/schwenk/wrk/tableparse/data/tricky_tables/unnamed-3.png'
-another_image = '/Users/schwenk/wrk/tableparse/data/tricky_tables/unnamed-2.png'
-easy_image = '/Users/schwenk/wrk/tableparse/vision-tableparse/examples/sight-word-bingo.png'
-
-output_dir = 'test_cc_output'
-test_images = glob.glob('/Users/schwenk/wrk/tableparse/data/test_data/images/*')
-
-# <codecell>
-
-# %%time
-# for image_to_do in test_images[97:]:
-#     test_img = cv2.imread(image_to_do)
-#     image_name = os.path.split(image_to_do)[-1]
-
-#     foreground_img = foreground_image(test_img)
-#     connected_components = connect_and_label_components(foreground_img)
-#     candidate_grid = find_largest_component(connected_components)
-#     grid_contours = compute_grid_contours(candidate_grid)
-
-#     bounding_boxes = [cell_from_contour(cont) for cont in grid_contours]
-
-#     cv2.imwrite(os.path.join(output_dir, image_name), test_img)
-#     cv2.imwrite(os.path.join(output_dir, image_name.replace('.png', '_grid.png')), candidate_grid)
-#     draw_detections(image_to_do, bounding_boxes).save(os.path.join(output_dir,image_name.replace('.png', '_cells.png')))
-
-# <codecell>
-
-image_to_do = test_images[110]
-
-image_to_do
-
-# <codecell>
-
-test_img = cv2.imread(image_to_do)
-image_name = os.path.split(image_to_do)[-1]
-
-foreground_img = foreground_image(test_img)
-connected_components = connect_and_label_components(foreground_img)
-candidate_grid = find_largest_component(connected_components)
-grid_contours = compute_grid_contours(candidate_grid)
-
-bounding_boxes = [cell_from_contour(cont) for cont in grid_contours]
-# grid_cells = [GridCell(cell_from_contour(cont)) for cont in grid_contours]
-
-# <markdowncell>
-
-# next and previous contours at the same hierarchical level, the first child contour and the parent contour
-
-# <codecell>
-
-timg = cv2.cvtColor(test_img, cv2.COLOR_BGR2GRAY)
-
-# <codecell>
-
-timg.min()
-
-# <codecell>
-
-(cv2.add(timg, candidate_grid)).min()
-
-# <codecell>
-
-ifa(cv2.add(timg, candidate_grid))
-
-# <codecell>
-
-ti_coutns = pd.Series(timg.flatten()).value_counts()
-ti_coutns[ti_coutns.index.isin([32, 255])]
-
-# <codecell>
-
-ifa(255 - foreground_img)
-
-# <codecell>
-
-pd.Series(foreground_img.flatten()).value_counts()
-
-# <codecell>
-
-cgc = pd.Series(candidate_grid.flatten()).value_counts()
-
-# <codecell>
-
-(candidate_grid + timg).min()
-
-# <codecell>
-
-timg[timg_gray < timg_gray.min() + 2] 
-
-# <codecell>
-
-timg[timg_gray < timg_gray.min() + 2].reshape(timg_gray.shape)
-
-# <codecell>
-
-pd.Series(timg.flatten()).min()
-
-# <codecell>
-
-ifa(timg)
-
-# <codecell>
-
-agc = pd.Series((candidate_grid + timg).flatten()).value_counts()
-agc[agc.index.isin([31, 255])]
-
-# <codecell>
-
-
-
-# <codecell>
-
-draw_detections(image_to_do, bounding_boxes)
-
-# <codecell>
-
-ifa(test_img)
-
-# <codecell>
-
-ifa(foreground_img)
-
-# <codecell>
-
-ifa(candidate_grid)
-
-# <codecell>
-
-ifb(connected_components)
-
-# <markdowncell>
-
-# # match to OCR
-
-# <codecell>
-
-image_to_do = test_images[97]
-
-test_img = cv2.imread(image_to_do)
-image_name = os.path.split(image_to_do)[-1]
-
-foreground_img = foreground_image(test_img)
-connected_components = connect_and_label_components(foreground_img)
-candidate_grid = find_largest_component(connected_components)
-grid_contours = compute_grid_contours(candidate_grid)
-
-bounding_boxes = [cell_from_contour(cont) for cont in grid_contours]
-draw_detections(image_to_do, bounding_boxes)
-
-# <codecell>
-
-np.argwhere(candidate_grid)
-
-# <codecell>
-
-test_ocr_img =cv2.cvtColor(test_img, cv2.COLOR_BGR2GRAY) + candidate_grid
-
-# <codecell>
-
-ifa(test_ocr_img)
-
-# <codecell>
-
-img_buffer = BytesIO()
-
-# <codecell>
-
-ifa(test_ocr_img).save(img_buffer, format="PNG")
-img_str = base64.b64encode(img_buffer.getvalue())
-
-# <codecell>
-
-img_str = base64.b64encode(cv2.imencode('.png', test_ocr_img)[1].tostring())
-
-# <codecell>
-
-
-
-# <codecell>
-
-import base64
-from io import BytesIO
-import requests
-
-# <codecell>
 
 api_entry_point = 'http://vision-ocr.dev.allenai.org/v1/ocr'
 b64_encoded_image = base64.b64encode(test_ocr_img.tostring())
@@ -374,7 +112,6 @@ response = requests.post(api_entry_point, data=json_data, headers=header)
 print(response.reason)
 json_response = json.loads(response.content.decode())
 
-# <codecell>
 
 def query_vision_ocr(image_url, merge_boxes=False, include_merged_components=False, as_json=True):
     b64_encoded_image = base64.b64encode(test_ocr_img)
@@ -396,7 +133,6 @@ def query_vision_ocr(image_url, merge_boxes=False, include_merged_components=Fal
         response = json_response
     return response
 
-# <codecell>
 
 class Box(object):
     
@@ -453,7 +189,6 @@ class GridCell(Box):
     def assign_detection(self, ocr):
         self.ocr = ocr
 
-# <codecell>
 
 def boxes_overlap(detected_box, grid_box, thresh=0.9):
     dx = min(detected_box.u_x(), grid_box.u_x()) - max(detected_box.l_x(), grid_box.l_x())
@@ -472,7 +207,6 @@ def assign_ocr_to_cells(detected_boxes, grid_boxes, thresh=0.5):
                 gb.assign_detection(db.text())
     return 
 
-# <codecell>
 
 def draw_detections_w_text(img_path, grid_cells):    
     image = cv2.imread(img_path)
@@ -483,42 +217,9 @@ def draw_detections_w_text(img_path, grid_cells):
         color_counter += 1
     return Image.fromarray(image)
 
-# <codecell>
 
 ocr_detections = [OcrBox(det) for det in json_response['detections']]
 
-# <codecell>
-
 grid_cells = [GridCell(cell) for cell in bounding_boxes]
 
-# <codecell>
-
 matches = assign_ocr_to_cells(ocr_detections, grid_cells)
-
-# <codecell>
-
-matches
-
-# <codecell>
-
-ocr_detections
-
-# <codecell>
-
-draw_detections_w_text(image_to_do, grid_cells)
-
-# <codecell>
-
-grid_cells
-
-# <markdowncell>
-
-# # Conclusions
-
-# <markdowncell>
-
-# Using connected components to find the grid is promising. It should work for nearly all Aristo Tables
-
-# <codecell>
-
-
