@@ -24,9 +24,9 @@
 
 # # Introduction
 
-# <codecell>
+# <markdowncell>
 
-#interactive tableparser dev
+# interactive tableparser dev
 
 # <markdowncell>
 
@@ -104,13 +104,22 @@ import ai2.vision.tableparse
 
 # <codecell>
 
-# image_to_do = '/Users/schwenk/wrk/tableparse/data/test_data/images/table_103.png'
-# image_to_do = '/Users/schwenk/wrk/tableparse/data/test_data/images/table_101.png'
-image_to_do = '/Users/schwenk/wrk/tableparse/data/test_data/images/table_111.png'
+Image.open(hierarch_headers[6])
 
 # <codecell>
 
-Image.open(image_to_do)
+# image_to_do = '/Users/schwenk/wrk/tableparse/data/test_data/images/table_103.png'
+test_data_dir = '/Users/schwenk/wrk/tableparse/data/test_data/images/'
+image_to_do = '/Users/schwenk/wrk/tableparse/data/tricky_tables/unnamed-1.png'
+# image_to_do = test_data_dir + 'table_101.png'
+# image_to_do = '/Users/schwenk/wrk/tableparse/data/test_data/images/table_111.png'
+
+
+hierarch_headers = ['/Users/schwenk/wrk/tableparse/data/tricky_tables/unnamed.png', test_data_dir + 'table_002.png', test_data_dir + 'table_008.png', test_data_dir + 'table_042.png', 
+                    test_data_dir + 'table_081.png', test_data_dir + 'table_110.png', test_data_dir + 'table_111.png']
+
+image_to_do = hierarch_headers[6]
+image_to_do
 
 # <codecell>
 
@@ -122,19 +131,89 @@ parsed_table = ai2.vision.tableparse.detect(image_to_do)
 
 # <codecell>
 
-parsed_table.outside_text
+cell_array = parsed_table.cell_array
+nonzero_cells = np.argwhere(cell_array)
+row_nzs = pd.Series(nonzero_cells[:, :1].flatten())
+col_nzs = pd.Series(nonzero_cells[:, 1:].flatten())
 
 # <codecell>
 
-test_ocr_cell = parsed_table.cell_array[0]
+incomplete_rows = row_nzs.value_counts() != cell_array.shape[1]
+incomplete_cols = col_nzs.value_counts() != cell_array.shape[0]
 
 # <codecell>
 
-parsed_table.nearest_grid_cell(test_ocr_cell)
+Image.open(image_to_do)
 
 # <codecell>
 
+header_rows = cell_array[incomplete_rows.sort_index()]
 
+# <codecell>
+
+def identify_header(cell_array):
+    nonzero_cells = np.argwhere(cell_array)
+    nz_cell_series = pd.Series(nonzero_cells[:, :1].flatten())
+
+# <codecell>
+
+def find_header_hierarchy(header_rows):
+    import itertools
+    from collections import defaultdict
+    cell_hierarchy = defaultdict(list)
+    for row_n in range(header_rows.shape[0] -1):
+        this_row = header_rows[row_n].tolist()
+        row_beneath = header_rows[row_n + 1].tolist()
+        cell_comps = list(itertools.product(row_beneath, this_row))
+        for comp in cell_comps:
+            if comp[0].borders_top(comp[1]):
+                cell_hierarchy[comp[1].table_id()].append(comp[0].table_id())
+    return cell_hierarchy
+
+# <codecell>
+
+def collapse_hierarchical_headers(header_rows, cell_hierarchy, active_cells=None):
+    if not active_cells:
+        active_cells = header_rows[0]
+    for cell in active_cells:
+        if cell.__bool__() and cell.table_id() not in cell_hierarchy:
+            yield cell
+        elif cell.__bool__():
+            child_cells = [copy.deepcopy(header_rows[eval(child)]) for child in cell_hierarchy[cell.table_id()]]
+            _ = [child.prepend_text(cell.text()) for child in child_cells]
+            yield from collapse_hierarchical_headers(header_rows, cell_hierarchy, child_cells)
+
+# <codecell>
+
+cell_hierarchy = find_header_hierarchy(header_rows)
+
+# <codecell>
+
+# def get_header_leaves():
+
+# <codecell>
+
+new_header = list(collapse_hierarchical_headers(header_rows, cell_hierarchy))
+
+# <codecell>
+
+new_header
+
+# <codecell>
+
+cell_array[incomplete_rows.sort_index()]
+
+# <codecell>
+
+matches
+
+# <codecell>
+
+header_rows[-1,:]
+
+# <markdowncell>
+
+# # compare to gt
 
 # <codecell>
 
